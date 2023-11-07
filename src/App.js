@@ -7,6 +7,7 @@ import StartScreen from "./components/StartScreen";
 import Questions from "./components/Questions";
 import NextButton from "./components/NextButton";
 import Progress from "./components/Progress";
+import FinishScreen from "./components/FinishScreen";
 
 const initialState = {
   questions: [],
@@ -15,7 +16,8 @@ const initialState = {
   status: "loading",
   index: 0,
   answer: null,
-  points: 0
+  points: 0,
+  highScore: 0
 }
 
 function reducer(state, action) {
@@ -54,13 +56,20 @@ function reducer(state, action) {
         answer: null
       }
 
+    case "finished":
+      return {
+        ...state,
+        status: "finished",
+        highScore: state.points > state.highScore ? state.points : state.highScore
+      }
+
     default:
       throw new Error("Action is Unknown !!!");
   }
 }
 
 function App() {
-  const [{ questions, status, index, answer, points }, dispatch] = useReducer(reducer, initialState);
+  const [{ questions, status, index, answer, points,highscore}, dispatch] = useReducer(reducer, initialState);
 
   const numQuestions = questions.length;
   const maxPossiblePoints = questions.reduce((prev, cur) => prev + cur.points, 0)
@@ -93,7 +102,7 @@ function App() {
             dispatch={dispatch}
           />}
 
-        {status === "active" &&
+        {status === "active" && (
           <>
             <Progress
               index={index}
@@ -102,15 +111,24 @@ function App() {
               answer={answer}
               maxPossiblePoints={maxPossiblePoints}
             />
+
             <Questions
               question={questions[index]}
               dispatch={dispatch}
               answer={answer}
             />
-          </>
-        }
 
-        <NextButton dispatch={dispatch} answer={answer} />
+            <NextButton
+              dispatch={dispatch}
+              answer={answer}
+              index={index}
+              numQuestions={numQuestions} />
+          </>
+        )}
+
+        {status === "finished" && (
+          <FinishScreen points={points} maxPossiblePoints={maxPossiblePoints}highscore={highscore} />
+        )}
 
       </Main>
 
