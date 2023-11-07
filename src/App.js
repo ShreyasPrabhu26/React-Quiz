@@ -8,6 +8,10 @@ import Questions from "./components/Questions";
 import NextButton from "./components/NextButton";
 import Progress from "./components/Progress";
 import FinishScreen from "./components/FinishScreen";
+import Footer from "./components/Footer";
+import Timer from "./components/Timer";
+
+const SECS_PER_QUESTION = 30;
 
 const initialState = {
   questions: [],
@@ -17,7 +21,8 @@ const initialState = {
   index: 0,
   answer: null,
   points: 0,
-  highScore: 0
+  highScore: 0,
+  secoundsRemaining: 10
 }
 
 function reducer(state, action) {
@@ -38,6 +43,7 @@ function reducer(state, action) {
     case "start":
       return {
         ...state, status: "active",
+        secoundsRemaining: state.questions.length * SECS_PER_QUESTION
       }
 
     case "newAnswer":
@@ -71,13 +77,20 @@ function reducer(state, action) {
         status: "ready"
       }
 
+    case "tick":
+      return {
+        ...state,
+        secoundsRemaining: state.secoundsRemaining - 1,
+        status: state.secoundsRemaining === 0 ? "finished" : state.status
+      }
+
     default:
       throw new Error("Action is Unknown !!!");
   }
 }
 
 function App() {
-  const [{ questions, status, index, answer, points, highscore }, dispatch] = useReducer(reducer, initialState);
+  const [{ questions, status, index, answer, points, highscore, secoundsRemaining }, dispatch] = useReducer(reducer, initialState);
 
   const numQuestions = questions.length;
   const maxPossiblePoints = questions.reduce((prev, cur) => prev + cur.points, 0)
@@ -126,11 +139,14 @@ function App() {
               answer={answer}
             />
 
-            <NextButton
-              dispatch={dispatch}
-              answer={answer}
-              index={index}
-              numQuestions={numQuestions} />
+            <Footer>
+              <Timer dispatch={dispatch} secoundsRemaining={secoundsRemaining} />
+              <NextButton
+                dispatch={dispatch}
+                answer={answer}
+                index={index}
+                numQuestions={numQuestions} />
+            </Footer>
           </>
         )}
 
