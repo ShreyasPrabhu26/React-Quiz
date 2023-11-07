@@ -22,6 +22,7 @@ const initialState = {
 
 function reducer(state, action) {
   switch (action.type) {
+
     case "dataRecived":
       return {
         ...state,
@@ -36,7 +37,7 @@ function reducer(state, action) {
 
     case "start":
       return {
-        ...state, status: "active"
+        ...state, status: "active",
       }
 
     case "newAnswer":
@@ -60,7 +61,14 @@ function reducer(state, action) {
       return {
         ...state,
         status: "finished",
-        highScore: state.points > state.highScore ? state.points : state.highScore
+        highscore: state.points > state.highScore ? state.points : state.highScore
+      }
+
+    case "restart":
+      return {
+        ...initialState,
+        questions: state.questions,
+        status: "ready"
       }
 
     default:
@@ -69,7 +77,7 @@ function reducer(state, action) {
 }
 
 function App() {
-  const [{ questions, status, index, answer, points,highscore}, dispatch] = useReducer(reducer, initialState);
+  const [{ questions, status, index, answer, points, highscore }, dispatch] = useReducer(reducer, initialState);
 
   const numQuestions = questions.length;
   const maxPossiblePoints = questions.reduce((prev, cur) => prev + cur.points, 0)
@@ -127,7 +135,12 @@ function App() {
         )}
 
         {status === "finished" && (
-          <FinishScreen points={points} maxPossiblePoints={maxPossiblePoints}highscore={highscore} />
+          <FinishScreen
+            dispatch={dispatch}
+            points={points}
+            maxPossiblePoints={maxPossiblePoints}
+            highscore={highscore}
+          />
         )}
 
       </Main>
